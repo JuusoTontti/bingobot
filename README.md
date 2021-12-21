@@ -2,13 +2,11 @@
 
 Requirements
 
-Python 3.9.6 https://www.python.org/downloads/
+```
+Python 3.7+ https://www.python.org/downloads/
+```
 
 Path to python.exe must be set in enviroment variables
-
-Bot framework
-
-https://github.com/TwitchIO/TwitchIO
 
 Twitchio library:
 
