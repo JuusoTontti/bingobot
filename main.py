@@ -41,6 +41,8 @@ class Bot(commands.Bot):
         if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
             self.isOpen = False
             await ctx.send(f'@{ctx.author.name} osallistuminen suljettu')
+        else:
+            await ctx.send("@" + ctx.author.name + " -> Sinulla ei ole oikeuksia tähän komentoon.")
 
     @commands.command()
     async def bingo(self,ctx: commands.Context):
@@ -76,7 +78,7 @@ class Bot(commands.Bot):
             if tulos in dictionary.values():
                 for self.osallistujat, self.tulokset in dictionary.items():
                     if self.tulos == None:
-                        await ctx.send(f'{ctx.author.name} -> Kierroksen tulosta ei ole vielä asetettu, moderaattorit asettakaa tulos käyttämälä !tulos komentoa.')
+                        await ctx.send(f'{ctx.author.name} -> Kierroksen tulosta ei ole vielä asetettu, moderaattorit asettakaa tulos käyttämällä !tulos komentoa.')
                     if self.tulokset == tulos:
                         await ctx.send(f'@{ctx.author.name} -> voittajia ovat {self.osallistujat}')
             else:
