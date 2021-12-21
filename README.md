@@ -11,7 +11,7 @@ Path to python.exe must be set in enviroment variables
 Twitchio library:
 
 ```
-py -m pip install -U twitchio
+python -m pip install -U twitchio
 ```
 
 Twitch IRC accesstoken
