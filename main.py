@@ -69,6 +69,8 @@ class Bot(commands.Bot):
              result = re.sub(regex, subst, ctx.message.content)
              await ctx.send(f'{ctx.author.name} tulos asetettu nyt voit listaa voittajat käyttämällä !listaa')
              self.tulos = result
+        else:
+                await ctx.send(f'@{ctx.author.name} -> Sinulla ei ole oikeuksia tähän komentoon.')
 
     @commands.command()
     async def listaa(self,ctx: commands.Context):
