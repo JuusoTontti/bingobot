@@ -1,6 +1,6 @@
 # bingobot
 
-#Vaatimukset
+# Vaatimukset
 
 Python 3.7+ (eli uudempi kuin python versio 3.7)
 ```
@@ -8,7 +8,7 @@ https://www.python.org/downloads/
 ```
 Python.exe tulee olla asetettu PATH-järjestelmämuuttujiin.
 
-##Ongelmatilanne 
+## Ongelmatilanne 
 windows tarjoaa windows-storea kun kirjoitat python.exe komentokehoitteeseen
 
 1. Käynnistä
@@ -16,7 +16,7 @@ windows tarjoaa windows-storea kun kirjoitat python.exe komentokehoitteeseen
 3. Etsi "App installer" joka osoittaa python.exe tai python3.exe
 4. Aseta pois käytöstä.
 
-#Twitchio library:
+# Twitchio library:
 
 Etsi pythonin asennuspolku esimerkiksi default asennuksena tehdyllä
 
