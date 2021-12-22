@@ -37,15 +37,22 @@ Tätä tarvitaan, jotta voidaan yhdistää twitch.tv:n chattiin.
 https://twitchapps.com/tmi/
 ```
 
-## Kloonaa tai copy&pastee main.py ja tallenna kunhan muistat .py päätteen.
-
 ## Asennus
 
 1. Avaa komentokehoite (CMD.exe)
-2. Syötä komento
+2. Syötä komennot
+
+Asetetaan oauth
 ```
 SET TMI_TOKEN=<TWITCH IRC TOKEN>
-SET BOT_PREFIX=!
-SET CHANNEL=<kanava jolle botti yhdistää käynnistyessään>
 ```
+Prefix josta tunnistetaan mikä on komento ja mikä ei (!aloita !sulje) jne. 
+```
+SET BOT_PREFIX=!
+```
+Kanava jolle botti yhdistää käynnistyessään
+```
+SET CHANNEL=
+```
+
 Nämä muuttujat botti tarvitsee toimiakseen, voit myös asettaa nämä myös käyttämällä windowsin ympäristömuuttujat valikkoa jos komentokehoitteen käyttäminen ei maistu.
