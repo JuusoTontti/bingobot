@@ -61,5 +61,6 @@ Nämä muuttujat botti tarvitsee toimiakseen, voit myös asettaa nämä myös k�
 
 ## Botin käynnistys
 1. Avaa CMD ja siirry kansioon jonne tallensit koodin
-2. Kirjoita main.py
-3. Jos kaikki meni hyvin botti ilmoittaa ikkunassa millä tunnuksilla se on kirjautunut sisään ja statuksensa
+2. Kirjoita tiedostonnimi, jolla tallensit koodipätkän. (esimerkiksi jos kloonasit repon niin main.py TAI jos kopioit ja tallensit toisella nimellä niin tämän tiedoston nimi)
+3. Paina enter
+4. Jos kaikki meni hyvin botti ilmoittaa ikkunassa millä tunnuksilla se on kirjautunut sisään ja statuksensa
