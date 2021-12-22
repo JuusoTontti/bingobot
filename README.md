@@ -2,21 +2,21 @@
 
 # Vaatimukset
 
-Python 3.7+ (eli uudempi kuin python versio 3.7)
+## Python 3.7+ (eli uudempi kuin python versio 3.7)
 ```
 https://www.python.org/downloads/
 ```
 Python.exe tulee olla asetettu PATH-järjestelmämuuttujiin.
 
-## Ongelmatilanne 
-windows tarjoaa windows-storea kun kirjoitat python.exe komentokehoitteeseen
+### Ongelmatilanne 
+Windows tarjoaa windows-storea kun kirjoitat python.exe komentokehoitteeseen
 
 1. Käynnistä
 2. "Manage app execution aliases"
 3. Etsi "App installer" joka osoittaa python.exe tai python3.exe
 4. Aseta pois käytöstä.
 
-# Twitchio library:
+## Twitchio library:
 
 Etsi pythonin asennuspolku esimerkiksi default asennuksena tehdyllä
 
@@ -28,7 +28,7 @@ Etsi pythonin asennuspolku esimerkiksi default asennuksena tehdyllä
 
 Tämä komento asentaa käyttämällä pythonin PIP pakettienhallintaa botin tarvitseman frameworkin
 
-#Twitch IRC access token:
+## Twitch IRC access token:
 
 Tätä tarvitaan, jotta voidaan yhdistää twitch.tv:n chattiin.
 
@@ -36,9 +36,7 @@ Tätä tarvitaan, jotta voidaan yhdistää twitch.tv:n chattiin.
 https://twitchapps.com/tmi/
 ```
 
-
-
-Asennus
+### Asennus
 
 1. Avaa komentokehoite (CMD.exe)
 2. Syötä komento
