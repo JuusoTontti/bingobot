@@ -30,6 +30,9 @@ Tämä komento asentaa käyttämällä pythonin PIP pakettienhallintaa botin tar
 
 Tätä tarvitaan, jotta voidaan yhdistää twitch.tv:n chattiin.
 
+1. Kirjaudu käyttäjällä, jolla haluat botin toimivan alla olevalle sivustolle, anna valtuutus ja saat sivusto generoi sinulle oauth tunnuksen.
+2. Aseta oauth TMI_TOKEN ympäristömuuttujaan
+
 ```
 https://twitchapps.com/tmi/
 ```
