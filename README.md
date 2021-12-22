@@ -1,8 +1,6 @@
-# bingobot
+## Vaatimukset
 
-# Vaatimukset
-
-## Python 3.7+ (eli uudempi kuin python versio 3.7)
+Python 3.7+ (eli uudempi kuin python versio 3.7)
 ```
 https://www.python.org/downloads/
 ```
@@ -36,7 +34,7 @@ Tätä tarvitaan, jotta voidaan yhdistää twitch.tv:n chattiin.
 https://twitchapps.com/tmi/
 ```
 
-### Asennus
+## Asennus
 
 1. Avaa komentokehoite (CMD.exe)
 2. Syötä komento
