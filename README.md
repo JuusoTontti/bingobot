@@ -37,6 +37,8 @@ Tätä tarvitaan, jotta voidaan yhdistää twitch.tv:n chattiin.
 https://twitchapps.com/tmi/
 ```
 
+## Kloonaa tai copy&pastee main.py ja tallenna kunhan muistat .py päätteen.
+
 ## Asennus
 
 1. Avaa komentokehoite (CMD.exe)
