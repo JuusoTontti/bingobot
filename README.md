@@ -56,3 +56,10 @@ SET CHANNEL=
 ```
 
 Nämä muuttujat botti tarvitsee toimiakseen, voit myös asettaa nämä myös käyttämällä windowsin ympäristömuuttujat valikkoa jos komentokehoitteen käyttäminen ei maistu.
+
+3. Copy&pastee tai kloonaa main.py tästä repositorystä ja tallenna (muista .py pääte).
+
+## Botin käynnistys
+1. Avaa CMD ja siirry kansioon jonne tallensit koodin
+2. Kirjoita main.py
+3. Jos kaikki meni hyvin botti ilmoittaa ikkunassa millä tunnuksilla se on kirjautunut sisään ja statuksensa
