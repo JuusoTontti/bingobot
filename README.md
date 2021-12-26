@@ -41,6 +41,7 @@ https://twitchapps.com/tmi/
 
 1. Avaa komentokehoite (CMD.exe)
 2. Syötä komennot
+3. Komennot mallissa setx <muuttujanimi> <välilyönti> <muuttuja>
 
 Asetetaan oauth
 ```
