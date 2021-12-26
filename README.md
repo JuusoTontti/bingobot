@@ -44,15 +44,15 @@ https://twitchapps.com/tmi/
 
 Asetetaan oauth
 ```
-SETX TMI_TOKEN=<TWITCH IRC TOKEN>
+SETX TMI_TOKEN <TWITCH IRC TOKEN>
 ```
 Prefix josta tunnistetaan mikä on komento ja mikä ei (!aloita !sulje) jne. 
 ```
-SETX BOT_PREFIX=!
+SETX BOT_PREFIX !
 ```
 Kanava jolle botti yhdistää käynnistyessään
 ```
-SETX CHANNEL=
+SETX CHANNEL <kanava>
 ```
 
 Nämä muuttujat botti tarvitsee toimiakseen, voit myös asettaa nämä myös käyttämällä windowsin ympäristömuuttujat valikkoa jos komentokehoitteen käyttäminen ei maistu.
