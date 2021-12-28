@@ -9,9 +9,9 @@ class Bot(commands.Bot):
         super().__init__(token=os.environ['TMI_TOKEN'], prefix=os.environ['BOT_PREFIX'], initial_channels=[os.environ['CHANNEL']])
         self.osallistujat = []
         self.tulokset = []
+        self.voittajat = []
         self.tulos = None
         self.isOpen = None
-
 
     # We are logged in and ready to chat and use commands...
     async def event_ready(self):
@@ -44,20 +44,31 @@ class Bot(commands.Bot):
             self.osallistujat = []
             #Clearing tulokset dictionary for new round
             self.tulokset = []
+            #Clearing voittajat
+            self.voittajat = []
             #Clearing tulos for new round
             self.tulos = None
             #Sending message to twitch chat 
             await ctx.send(f'@{ctx.author.name} -> Bingo aloitettu')
+            #Printing newline to our console
+            print('-----')
 
     #Registering command for the bot
     @commands.command()
     async def sulje(self,ctx: commands.Context):
         #Checking if command was send by a moderator
         if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
-            #Closing bingo 
-            self.isOpen = False
-            #Sending message to twitch chat 
-            await ctx.send(f'@{ctx.author.name} osallistuminen suljettu')
+            #Checking noone has closed bingo yet 
+            if self.isOpen == True:
+                #Sending confirmation to chat
+                await ctx.send(f'@{ctx.author.name} osallistuminen suljettu')
+                #Joining our dictionaries
+                self.voittajat = dict(zip(self.osallistujat, self.tulokset))
+                #Closing bingo participation
+                self.isOpen = False
+            else:
+                #Sending message when bingo is already closed but someone sent command to close it.
+                await ctx.send(f'@{ctx.author.name} -> Bingo on jo suljettu')
 
     #Registering command for the bot
     @commands.command()
@@ -97,10 +108,22 @@ class Bot(commands.Bot):
                 regex = r"!tulos "
                 subst = ""
                 result = re.sub(regex, subst, ctx.message.content)
-                #Setting tulos variable so we can find our winners
-                self.tulos = result
-                #Sending confirmation to message author 
-                await ctx.send(f'@{ctx.author.name} tulos asetettu nyt voit listaa voittajat käyttämällä !listaa')
+                if re.match("^((30)|([0-2]?[0-9]{1,1}))$", result):
+                    #Setting tulos variable so we can find our winners
+                    self.tulos = result
+                    dictionary = self.voittajat
+                    if result in dictionary.values():
+                        for self.osallistujat, self.tulokset in dictionary.items():
+                            if self.tulos == None:
+                                await ctx.send(f'@{ctx.author.name} -> Kierroksen tulosta ei ole vielä asetettu, moderaattorit asettakaa tulos käyttämällä !tulos komentoa.')
+                            if self.tulokset == result:
+                                await ctx.send(f'@{ctx.author.name} -> voittajia ovat {self.osallistujat}')
+                                print(f'{ctx.author.name}: voittajia ovat {self.osallistujat}')
+                    else:
+                        await ctx.send(f'@{ctx.author.name} -> Ei voittajia!')
+                        print(f'{ctx.author.name}: Ei voittajia!')
+                else:
+                    await ctx.send(f'@{ctx.author.name} -> Syötä oikea tulos')
 
     #Registering command for the bot
     @commands.command()
@@ -108,7 +131,7 @@ class Bot(commands.Bot):
         #Checking if command was send by a moderator
         if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
             #Joining our two dictionaries
-            dictionary = dict(zip(self.osallistujat, self.tulokset))
+            dictionary = self.voittajat
             tulos = self.tulos
             if tulos in dictionary.values():
                 for self.osallistujat, self.tulokset in dictionary.items():
@@ -116,8 +139,10 @@ class Bot(commands.Bot):
                         await ctx.send(f'@{ctx.author.name} -> Kierroksen tulosta ei ole vielä asetettu, moderaattorit asettakaa tulos käyttämällä !tulos komentoa.')
                     if self.tulokset == tulos:
                         await ctx.send(f'@{ctx.author.name} -> voittajia ovat {self.osallistujat}')
+                        print(f'{ctx.author.name}: voittajia ovat {self.osallistujat}')
             else:
-                await ctx.send(f'@{ctx.author.name} Ei voittajia!')
+                await ctx.send(f'@{ctx.author.name} -> Ei voittajia!')
+                print(f'{ctx.author.name}: Ei voittajia!')
 
 if __name__ == '__main__':
     bot = Bot()
