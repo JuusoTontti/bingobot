@@ -134,7 +134,7 @@ class Bot(commands.Bot):
                 await ctx.send(f'Hydyllä on apupyörät käytössä')
             if autopayStatus == 'off':
                 self.autopayStatus = False
-                await ctx.send(f'Hydy oppi ajamaan polkupyörällä')
+                await ctx.send(f'Hydy oppi ajamaan ilman apupyöriä')
 
     #Registering command for the bot
     @commands.command()
