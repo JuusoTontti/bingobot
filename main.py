@@ -1,7 +1,6 @@
 import os
+import asyncio
 from twitchio.ext import commands
-import re
-import time
 
 class Bot(commands.Bot):
 
@@ -13,16 +12,21 @@ class Bot(commands.Bot):
                 self.data = [(line.strip()) for line in f.readlines()]
         except FileNotFoundError:
             self.data = []
-
-        self.osallistujat = []
-        self.tulokset = []
-        self.voittajat = []
+        self.tulokset = {}
+        self.voittajat = ""
+        self.osallistujat = None
         self.tulos = None
         self.isOpen = False
-        #Experimental feature which must be toggled on changing "False" to "True" below.
-        self.autoPay = False
-        #Set reward
-        self.autoPayReward = 5000
+        self.ilmoitusBingoaloitettu = 'Bingo aloitettu'
+        self.ilmoitusBingoauki = 'Bingo on jo auki...'
+        self.ilmoitusBingosuljettu = 'Bingo suljettu'
+        self.ilmoitusBingotyhmä = 'Bingo on jo suljettu tyhmä'
+        self.ilmoitusBingomyöhässä = 'Myöhässä KEKW'
+        self.ilmoitusBingonumerotallennettu = 'VoteYea'
+        #Experimental autopay: change False -> True below if you want to enable autopay feature on bot startup
+        self.autopayStatus = False
+        #Prize for winning in bingo
+        self.autoPayprize = 5000
 
     # We are logged in and ready to chat and use commands...
     async def event_ready(self):
@@ -52,160 +56,95 @@ class Bot(commands.Bot):
             if self.isOpen == False:
                 #Opening bingo game for users
                 self.isOpen = True
-                #Clearing osallistujat dictionary for new round
-                self.osallistujat = []
-                #Clearing tulokset dictionary for new round
-                self.tulokset = []
-                #Clearing voittajat
-                self.voittajat = []
                 #Clearing tulos for new round
                 self.tulos = None
                 #Sending message to twitch chat 
-                await ctx.send(f'@{ctx.author.name} -> Bingo aloitettu')
-                #Opening bingo for participation
-                self.isOpen = True
+                await ctx.send(f'@{ctx.author.name} -> {self.ilmoitusBingoaloitettu}')
+                #Clearing tulokset dictionary
+                self.tulokset = {}
+                #Clearing voittajat string
+                self.voittajat = ""
                 #Printing newline to our console
                 print('-----')
             else:
                 #Someone tried to open bingo even it was already open
-                await ctx.send(f'@{ctx.author.name} -> Bingo on jo auki...')
+                await ctx.send(f'@{ctx.author.name} -> {self.ilmoitusBingoauki}')
 
-    #Registering command for the bot
     @commands.command()
     async def sulje(self,ctx: commands.Context):
-        #Checking if command was send by a moderator
         if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
-            #Checking noone has closed bingo yet 
             if self.isOpen == True:
-                #Sending confirmation to chat
-                await ctx.send(f'@{ctx.author.name} osallistuminen suljettu')
-                #Joining our dictionaries
-                self.voittajat = dict(zip(self.osallistujat, self.tulokset))
-                #Closing bingo participation
                 self.isOpen = False
+                await ctx.send(f'@{ctx.author.name} {self.ilmoitusBingosuljettu}')
             else:
-                #Sending message when bingo is already closed but someone sent command to close it.
-                await ctx.send(f'@{ctx.author.name} -> Bingo on jo suljettu')
+                await ctx.send(f'@{ctx.author.name} {self.ilmoitusBingotyhmä}')
 
     #Registering command for the bot
     @commands.command()
-    async def bingo(self,ctx: commands.Context):
+    async def bingo(self,ctx: commands.Context, tulos: int) -> None:
         if ctx.author.name in self.data:
             print(f'{ctx.author.name} yritti väkisin osallistua bingoon')
         else:
-            #Searching !bingo command from chat
-            if re.search("!bingo", ctx.message.content):
-                #Checking if bingo game is open for participants
-                if self.isOpen == True:
-                    #Finding !bingo and removing it from chat message
-                    regex = r"!bingo "
-                    subst = ""
-                    result = re.sub(regex, subst, ctx.message.content)
-                    #Checking that bingo aswer was inside of range 0-30
-                    tulosregex = r"^((30)|([0-2]?[0-9]{1,1}))$"
-                    #If aswer was inside of 0-30 range and has !bingo command then
-                    if re.match(tulosregex,result):
-                        #Sending confirmation to command author
-                        await ctx.send(f'@{ctx.author.name} vastauksesi on rekisteröity!')
-                        #Appending osallistujat dictionary by author name
-                        self.osallistujat.append(ctx.author.name)
-                        #Appending tulokset dictionary by author result
-                        self.tulokset.append(result)
+            if self.isOpen == True:
+                if 0 <= tulos <= 30:
+                    tulokset = self.tulokset
+                    tulokset[ctx.author.name] = tulos
+                    tulokset = self.tulokset
+                    await ctx.send(f'@{ctx.author.name} {self.ilmoitusBingonumerotallennettu}')
+                else:
+                    await ctx.send(f'@{ctx.author.name} tuloksesi ei ole 0-30 alueen sisällä!')
+            else:
+                await ctx.send(f'@{ctx.author.name} -> {self.ilmoitusBingomyöhässä}')
+
+    #Registering command for the bot
+    @commands.command()
+    async def tulos(self,ctx: commands.Context, tulos: int ) -> None:
+        if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
+            if self.isOpen == True:
+                await ctx.send(f'@{ctx.author.name} Sulje ensin bingo pälli')
+            if self.isOpen == False:
+                if 0 <= tulos <= 30:
+                    for k, v in sorted(self.tulokset.items(),key=lambda x: x[1]):
+                        print(f'{k}:{v}')
+                        if tulos == v:
+                            self.voittajat += k + ", "
+                    if self.voittajat == "":
+                        print(f'Kierroksen tulos on {tulos}')
+                        print(f'Ei voittajia')
+                        await ctx.send(f'Ei voittajia')
                     else:
-                        #When aswer was not in 0-30 range then send message to that author in twitch chat
-                        await ctx.send(f'@{ctx.author.name} tuloksesi ei ole 0-30 alueen sisällä!')
+                        print(f'Kierroksen tulos on {tulos}')
+                        print(f'Voittajia ovat: {self.voittajat}')
+                        await ctx.send(f'Voittajia ovat: {self.voittajat}')
+                        if self.autopayStatus == True:
+                            for k, v in sorted(self.tulokset.items(),key=lambda x: x[1]):
+                                if tulos == v:
+                                    await asyncio.sleep(2)
+                                    await ctx.send(f'!s {k} {self.autoPayprize}')
                 else:
-                    #If command was given when bingo game was not open for participation
-                    await ctx.send(f'@{ctx.author.name} -> Bingoon osallistuminen on tällä hetkellä suljettu')
+                    await ctx.send(f'{ctx.author.name} syöttämäsi tulos ei ole 0-30 alueen sisällä')
 
     #Registering command for the bot
     @commands.command()
-    async def tulos(self,ctx: commands.Context):
+    async def työttömyys(self,ctx: commands.Context, autopayStatus: str) -> None:
         #Checking if command was send by a moderator
         if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
-            #Searching for !tulos command in twitch chat and clearing up that message
-            if re.search("!tulos", ctx.message.content):
-                regex = r"!tulos "
-                subst = ""
-                result = re.sub(regex, subst, ctx.message.content)
-                if re.match("^((30)|([0-2]?[0-9]{1,1}))$", result):
-                    #Setting tulos variable so we can find our winners
-                    self.tulos = result
-                    dictionary = self.voittajat
-                    print(f'Kierroksen tulos oli {result}')
-                    for self.osallistujat, self.tulokset in sorted(dictionary.items(), key=lambda x: x[1]):
-                        print(f'{self.osallistujat} : {self.tulokset}')
-                        if result in dictionary.values():
-                            if self.tulos == None:
-                                await ctx.send(f'@{ctx.author.name} -> Kierroksen tulosta ei ole vielä asetettu, moderaattorit asettakaa tulos käyttämällä !tulos komentoa.')
-                            if self.tulokset == result:
-                                #Checking if autopay is enabled
-                                if self.autoPay == True:
-                                    await ctx.send(f'!s {self.osallistujat} {self.autoPayReward}')
-                                    print(f'Voittajia ovat {self.osallistujat}')
-                                    time.sleep(.5)
-                                else:
-                                    await ctx.send(f'Voittajia ovat {self.osallistujat}')
-                                    print(f'Voittajia ovat {self.osallistujat}')
-                    if result not in dictionary.values():
-                        await ctx.send(f'Ei voittajia!')
-                        print(f'Ei voittajia!')
-                else:
-                    await ctx.send(f'@{ctx.author.name} -> Syötä oikea tulos')
+            if autopayStatus == 'on':
+                self.autopayStatus = True
+                await ctx.send(f'Hydyllä on apupyörät käytössä')
+            if autopayStatus == 'off':
+                self.autopayStatus = False
+                await ctx.send(f'Hydy oppi ajamaan polkupyörällä')
 
     #Registering command for the bot
     @commands.command()
-    async def listaa(self,ctx: commands.Context):
+    async def ignore(self,ctx: commands.Context, result: str):
         #Checking if command was send by a moderator
         if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
-            #Joining our two dictionaries
-            dictionary = self.voittajat
-            tulos = self.tulos
-            print(f'######')
-            print(f'Kierroksen tulos oli {tulos}')
-            for self.osallistujat, self.tulokset in sorted(dictionary.items(), key=lambda x: x[1]):
-                print(f'{self.osallistujat} : {self.tulokset}')
-                if tulos in dictionary.values():
-                    if self.tulos == None:
-                        await ctx.send(f'@{ctx.author.name} -> Kierroksen tulosta ei ole vielä asetettu, moderaattorit asettakaa tulos käyttämällä !tulos komentoa.')
-                    if self.tulokset == tulos:
-                        await ctx.send(f'Voittajia ovat {self.osallistujat}')
-                        print(f'Voittajia ovat {self.osallistujat}')
-            if tulos not in dictionary.values():
-                await ctx.send(f'Ei voittajia!')
-                print(f'Ei voittajia!')
-
-    #Registering command for the bot
-    @commands.command()
-    async def työttömyys(self,ctx: commands.Context):
-        #Checking if command was send by a moderator
-        if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
-            #Searching for !työttömyys command in twitch chat and clearing up that message
-            if re.search("!työttömyys", ctx.message.content):
-                regex = r"!työttömyys "
-                subst = ""
-                result = re.sub(regex, subst, ctx.message.content)
-                if re.match("on", result):
-                    self.autoPay = True
-                if re.match("off", result):
-                    self.autoPay = False
-                if re.match("status", result):
-                    await ctx.send(f'Autopay status is {self.autoPay}')
-
-    #Registering command for the bot
-    @commands.command()
-    async def ignore(self,ctx: commands.Context):
-        #Checking if command was send by a moderator
-        if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
-            #Searching for !ignore command in twitch chat and clearing up that message
-            if re.search("!ignore", ctx.message.content):
-                regex = r"!ignore "
-                subst = ""
-                result = re.sub(regex, subst, ctx.message.content)
-                self.data.append(result)
-                with open('banlist.txt','w') as f:
-                    for item in self.data:
-                        f.write('%s\n' % item)
+            self.data.append(result)
+            with open('banlist.txt','w') as f:
+                for item in self.data:
+                    f.write('%s\n' % item)
 
 if __name__ == '__main__':
     bot = Bot()
