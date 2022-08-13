@@ -30,16 +30,22 @@ class Bot(commands.Bot):
         # Variable for aswer when !bingo command is seen in chat but game is not open
         self.ilmoitusBingomyöhässä = 'Myöhässä KEKW'
         self.ilmoitusBingonumerotallennettu = 'VoteYea'
-        #Experimental autopay: change False -> True below if you want to enable autopay feature on bot startup
-        self.autopayStatus = False
+        #Experimental autopay
+        self.autopayStatus = True
         #Prize for winning in bingo
         self.autoPayprize = 5000
+        #
+        self.kierrosMaksettu = False
 
     # We are logged in and ready to chat and use commands...
     async def event_ready(self):
         # Printing bot nickname to cmd after it has connected successfully to twitch chat
         print(f'Logged in as | {self.nick}')
         print('Bot loaded and ready')
+        if self.autopayStatus == True:
+            print(f'Autopay feature is on')
+        elif self.autopayStatus == False:
+            print(f'Autopay feature is off')
 
     # Doing some error handling to not flood cmd when command is not registered to this bot.
     async def event_command_error(self,ctx: commands.Context,error: Exception):
@@ -72,6 +78,8 @@ class Bot(commands.Bot):
                 self.tulokset = {}
                 # Clearing voittajat string
                 self.voittajat = ""
+                # Autopay reset
+                self.kierrosMaksettu = False
                 # Printing newline to our console
                 print('-----')
             else:
@@ -138,12 +146,16 @@ class Bot(commands.Bot):
                     else:
                         print(f'Kierroksen tulos on {tulos}')
                         print(f'Voittajia ovat: {self.voittajat}')
-                        await ctx.send(f'Voittajia ovat: {self.voittajat} Clap')
+                        await ctx.send(f'Voittajia ovat: {self.voittajat}')
                         if self.autopayStatus == True:
-                            for k, v in sorted(self.tulokset.items(),key=lambda x: x[1]):
-                                if tulos == v:
-                                    await asyncio.sleep(2)
-                                    await ctx.send(f'!s {k} {self.autoPayprize}')
+                            if self.kierrosMaksettu == False:
+                                for k, v in sorted(self.tulokset.items(),key=lambda x: x[1]):
+                                    if tulos == v:
+                                        await asyncio.sleep(2)
+                                        await ctx.send(f'!s {k} {self.autoPayprize}')
+                            elif self.kierrosMaksettu == True:
+                                await ctx.send(f'@{ctx.author.name} Kierroksen voittajille on jo maksettu')
+                        self.kierrosMaksettu = True
                 else:
                     await ctx.send(f'@{ctx.author.name} syöttämäsi tulos ei ole 0-30 alueen sisällä')
 
@@ -154,10 +166,10 @@ class Bot(commands.Bot):
         if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
             if autopayStatus == 'on':
                 self.autopayStatus = True
-                await ctx.send(f'Hydyllä on apupyörät käytössä')
+                await ctx.send(f'Autopay käytössä')
             if autopayStatus == 'off':
                 self.autopayStatus = False
-                await ctx.send(f'Hydy oppi ajamaan ilman apupyöriä')
+                await ctx.send(f'Autopay pois käytöstä')
             if autopayStatus == 'status':
                 if self.autopayStatus == True:
                     await ctx.send(f'@{ctx.author.name} Modet ovat työttömiä')
