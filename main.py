@@ -30,11 +30,12 @@ class Bot(commands.Bot):
         # Variable for aswer when !bingo command is seen in chat but game is not open
         self.ilmoitusBingomyöhässä = 'Myöhässä KEKW'
         self.ilmoitusBingonumerotallennettu = 'VoteYea'
-        #Experimental autopay
+        self.tervetuloa = 'TÄNÄÄN PELATAANKIN MURJOA, JA EKA CHÄTISSÄ VITUN PELLET'
+        # Experimental autopay
         self.autopayStatus = True
-        #Prize for winning in bingo
+        # Prize for winning in bingo
         self.autoPayprize = 5000
-        #
+        # Reset gameround to default state
         self.kierrosMaksettu = False
 
     # We are logged in and ready to chat and use commands...
@@ -42,6 +43,7 @@ class Bot(commands.Bot):
         # Printing bot nickname to cmd after it has connected successfully to twitch chat
         print(f'Logged in as | {self.nick}')
         print('Bot loaded and ready')
+        await self.tervetuloa_msg()
         if self.autopayStatus == True:
             print(f'Autopay feature is on')
         elif self.autopayStatus == False:
@@ -61,6 +63,10 @@ class Bot(commands.Bot):
 
         # Waiting to catch commands from new events and executing them
         await self.handle_commands(message)
+
+    async def tervetuloa_msg(self):
+        channel = self.get_channel("GGMadMan")
+        await channel.send(self.tervetuloa)
 
     # Registering command for the bot
     @commands.command()
@@ -134,30 +140,31 @@ class Bot(commands.Bot):
                 # Notifying user that bingo must be closed before setting result
                 await ctx.send(f'@{ctx.author.name} Sulje ensin bingo pälli')
             if self.isOpen == False:
-                if 0 <= tulos <= 30:
-                    for k, v in sorted(self.tulokset.items(),key=lambda x: x[1]):
-                        print(f'{k}:{v}')
-                        if tulos == v:
-                            self.voittajat += k + ", "
-                    if self.voittajat == "":
-                        print(f'Kierroksen tulos on {tulos}')
-                        print(f'Ei voittajia')
-                        await ctx.send(f'Ei voittajia')
+                if self.kierrosMaksettu == False:
+                    if 0 <= tulos <= 30:
+                        for k, v in sorted(self.tulokset.items(),key=lambda x: x[1]):
+                            print(f'{k}:{v}')
+                            if tulos == v:
+                                self.voittajat += k + ", "
+                        if self.voittajat == "":
+                            print(f'Kierroksen tulos on {tulos}')
+                            print(f'Ei voittajia')
+                            await ctx.send(f'Ei voittajia')
+                        else:
+                            print(f'Kierroksen tulos on {tulos}')
+                            print(f'Voittajia ovat: {self.voittajat}')
+                            await ctx.send(f'Voittajia ovat: {self.voittajat}')
+                            if self.autopayStatus == True:
+                               for k, v in sorted(self.tulokset.items(),key=lambda x: x[1]):
+                                if tulos == v:
+                                    await asyncio.sleep(2)
+                                    await ctx.send(f'!s {k} {self.autoPayprize}')
+                                    self.kierrosMaksettu = True
                     else:
-                        print(f'Kierroksen tulos on {tulos}')
-                        print(f'Voittajia ovat: {self.voittajat}')
-                        await ctx.send(f'Voittajia ovat: {self.voittajat}')
-                        if self.autopayStatus == True:
-                            if self.kierrosMaksettu == False:
-                                for k, v in sorted(self.tulokset.items(),key=lambda x: x[1]):
-                                    if tulos == v:
-                                        await asyncio.sleep(2)
-                                        await ctx.send(f'!s {k} {self.autoPayprize}')
-                            elif self.kierrosMaksettu == True:
-                                await ctx.send(f'@{ctx.author.name} Kierroksen voittajille on jo maksettu')
-                        self.kierrosMaksettu = True
-                else:
-                    await ctx.send(f'@{ctx.author.name} syöttämäsi tulos ei ole 0-30 alueen sisällä')
+                        await ctx.send(f'@{ctx.author.name} syöttämäsi tulos ei ole 0-30 alueen sisällä')
+                elif self.kierrosMaksettu == True:
+                    await ctx.send(f'@{ctx.author.name} Kierroksen voittajille on jo maksettu')
+                    self.kierrosMaksettu = True
 
     # Registering command for the bot
     @commands.command()
