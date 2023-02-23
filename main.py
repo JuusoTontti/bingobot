@@ -25,12 +25,14 @@ class Bot(commands.Bot):
         self.ilmoitusBingoauki = 'Bingo on jo auki...'
         # Variable for aswer when admin closes bingo game
         self.ilmoitusBingosuljettu = 'Bingo suljettu'
+        # Variable for aswer when admin opens bingo for late arrivals
+        self.ilmoitusAvattu = 'Bingo avattu, koska joku ei osaa tulla ajoissa paikalle....'
         # Variable for when bingo is already closed but closing command is seen in chat
         self.ilmoitusBingotyhmä = 'Bingo on jo suljettu tyhmä'
+        self.ilmoitusaukiBingotyhmä = 'Bingo on jo auki tyhmä'
         # Variable for aswer when !bingo command is seen in chat but game is not open
         self.ilmoitusBingomyöhässä = 'Myöhässä KEKW'
         self.ilmoitusBingonumerotallennettu = 'VoteYea'
-        self.tervetuloa = 'TÄNÄÄN PELATAANKIN MURJOA, JA EKA CHÄTISSÄ VITUN PELLET'
         # Experimental autopay
         self.autopayStatus = True
         # Prize for winning in bingo
@@ -43,7 +45,6 @@ class Bot(commands.Bot):
         # Printing bot nickname to cmd after it has connected successfully to twitch chat
         print(f'Logged in as | {self.nick}')
         print('Bot loaded and ready')
-        await self.tervetuloa_msg()
         if self.autopayStatus == True:
             print(f'Autopay feature is on')
         elif self.autopayStatus == False:
@@ -63,10 +64,6 @@ class Bot(commands.Bot):
 
         # Waiting to catch commands from new events and executing them
         await self.handle_commands(message)
-
-    async def tervetuloa_msg(self):
-        channel = self.get_channel("GGMadMan")
-        await channel.send(self.tervetuloa)
 
     # Registering command for the bot
     @commands.command()
@@ -91,6 +88,20 @@ class Bot(commands.Bot):
             else:
                 # Someone tried to open bingo even it was already open
                 await ctx.send(f'@{ctx.author.name} -> {self.ilmoitusBingoauki}')
+
+    # Registering command for the bot
+    @commands.command()
+    async def avaa(self,ctx: commands.Context):
+        # Checking if command was send by a moderator
+        if ctx.author.is_mod or ctx.author.name == os.environ['CHANNEL']:
+            # If bingo game is open and !sulje command is seen in chat to close game
+            if self.isOpen == False:
+                self.isOpen = True
+                # Send confirmation chat message
+                await ctx.send(f'@{ctx.author.name} {self.ilmoitusAvattu}')
+            else:
+                # Bingo is already open and send that information to chat
+                await ctx.send(f'@{ctx.author.name} {self.ilmoitusaukiBingotyhmä}')
 
     # Registering command for the bot
     @commands.command()
